@@ -539,3 +539,110 @@ Vue会尽可能的复用已有元素而不是重新渲染，这样可以提升�
 
 ### v-if 与 v-for
 当与v-for一起使用时，v-for具有比v-if更高的优先级。
+
+## 列表渲染
+### v-for
+
+#### 基本用法
+```js
+    <ul id="example-1">
+		<li v-for="item of items">
+			{{ item.message }}
+		</li>
+	</ul>
+	
+	var example1 = new Vue({
+		el:"#example-1",
+		data:{
+			items:[
+				{message:'Foooo'},
+				{message:'Bar'}
+			]
+		}
+	})
+```
+在v-for块中，拥有对父作用域属性的完全访问权限，还支持一个可选的第二个参数作为当前项的索引值。
+```js
+    <ul id="example-2">
+        <li v-for="(item, index) of items">
+            {{ parentMessage }} - {{ index }} - {{ item.message }}
+        </li>
+    </ul>
+    
+    var example2 = new Vue({
+        el: '#example-2',
+        data: {
+            parentMessage: 'Parent',
+            items: [
+                { message: 'Foo' },
+                { message: 'Bar' }
+            ]
+        }
+    })
+```
+#### Template v-for
+```js
+    <ul>
+        <template v-for="item in items">
+            <li>{{ item.msg }}</li>
+            <li class="divider"></li>
+        </template>
+    </ul>
+    
+    var a = new Vue({
+		el:"ul",
+		data:{
+			items:[
+				{ msg: 'leo' },
+				{ msg: 'Messi' }
+			]
+		}
+	})
+```
+带有v-for的template标签来渲染多个元素块，这与v-if条件渲染模板相同。
+
+#### 对象 v-for
+也可以使用v-for迭代对象的属性
+```js
+    <ul id="repeat-object" class="demo">
+		<li v-for="value in object">
+			{{ value }}
+		</li>
+	</ul>
+	
+    new Vue({
+		el:"#repeat-object",
+		data:{
+			object:{
+				firstName:"John",
+				lastName:"Doe",
+				age:30
+			}
+		}
+	})
+```
+同样的可以使用键名和索引作为参数，与对象数组不同的是第二个参数是键名，第三个参数是索引。
+```js
+    <div v-for="(value, key, index) in object">
+        {{ index }}. {{ key }} : {{ value }}
+    </div>
+```
+> 遍历对象时是按照Object.keys()的结果遍历，但是不同的引擎得到的结果不尽相同。
+
+#### 范围 v-for
+v-for可以取整数，此时它将重复多次模板
+```js
+    <div>
+        <span v-for="n of 10">{{ n }}</span>
+    </div>
+    
+    new Vue({
+    	el:"div"
+    })
+```
+
+#### 组件和v-for
+> !!! 暂时跳过 了解组件后再阅读学习
+
+#### v-for 和 v-if
+
