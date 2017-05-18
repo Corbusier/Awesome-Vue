@@ -134,21 +134,20 @@ v-html内部的html被改为了
 
 ```js
     <div id="example">
-		<p>Original message: {{ message }}</p>
-		<p>Computed reversed message: {{ reversedMessage }}</p>
-	</div>
+	<p>Original message: {{ message }}</p>
+	<p>Computed reversed message: {{ reversedMessage }}</p>
+    </div>
 	
-	var vm = new Vue({
-		el:"#example",
-		data:{
-			message:"hello"
-		},
-		computed:{
-			reversedMessage:function(){
-				return this.message.split("").reverse().join("");
-			}
-		}
-	})
+    var vm = new Vue({
+	el:"#example",
+	data:{
+	    message:"hello"
+	},
+	computed:{
+	    reversedMessage:function(){
+	    return this.message.split("").reverse().join("");
+	}
+    })
 ```
 而这种属性之间的"依赖"Vue也是能发现的，当vm.message做出改变时，reversedMessage也会改变。
 
@@ -198,46 +197,46 @@ $watch用于观察Vue实例上的数据变动。当数据需要根据其他数�
 以上的代码是命令式和重复的，以下是计算属性的方式：
 ```js
     var vm = new Vue({
-		el:"#demo",
-		data:{
-			firstName : "Foo",
-			lastName : "Bar"
-		},
-		computed:{
-			fullName:function(){
-				return this.fullName = this.firstName + ' ' + this.lastName;
-			}
-		}
-	})
+	el:"#demo",
+	data:{
+	    firstName : "Foo",
+	    lastName : "Bar"
+	},
+	computed:{
+	    fullName:function(){
+	        return this.fullName = this.firstName + ' ' + this.lastName;
+	    }
+	}
+    })
 ```
 
 ### 计算Setter
 计算属性默认只有getter，在适当的时候可以提供一个setter：
 ```js
     var vm = new Vue({
-		el:"#demo",
-		data:{
-			firstName : "Foo",
-			lastName : "Bar"
-		},
-		computed:{
-			fullName: {
-		        // getter
-			    get: function () {
+	el:"#demo",
+	data:{
+	    firstName : "Foo",
+	    lastName : "Bar"
+	},
+	computed:{
+	    fullName: {
+                // getter
+	        get: function () {
                     return this.firstName + ' ' + this.lastName
-			    },
-			    // setter
-			    set: function (newValue) {
-			        var names = newValue.split(' ')
-			        this.firstName = names[0]
-			        this.lastName = names[names.length - 1]
-			    }
-		  	}	
-		}
-	})
-	vm.fullName = "John Doe";
-	console.log(vm.firstName);
-	console.log(vm.lastName);
+	        },
+                // setter
+	        set: function (newValue) {
+		    var names = newValue.split(' ')
+		    this.firstName = names[0]
+		    this.lastName = names[names.length - 1]
+	        }
+	    }	
+        }
+    })
+    vm.fullName = "John Doe";
+    console.log(vm.firstName);
+    console.log(vm.lastName);
 ```
 可以看到当fullName改变时，正是由于set的存在，使得firstName和lastName都会被修改。
 
@@ -343,6 +342,7 @@ Vue 提供一个更通用的方法通过 watch 选项，来响应数据的变化
 		}
 	}
 ```
+
 ```js
     <!-- 一个对象、多个key的对象以及计算属性均可得到 -->
     <div class="static active"></div>
@@ -362,9 +362,9 @@ Vue 提供一个更通用的方法通过 watch 选项，来响应数据的变化
 ```js
     <div v-bind:class="[{ active: isActive },errorClass]">
     data: {
-		isActive:true,
-		errorClass: 'text-danger'
-	}
+	isActive:true,
+	errorClass: 'text-danger'
+    }
 ```
 默认添加errorClass为'text-danger'，只有在 isActive 是 true 时添加 activeClass 。
 
@@ -388,19 +388,19 @@ Vue 提供一个更通用的方法通过 watch 选项，来响应数据的变化
 同样可以结合返回对象的计算属性使用
 ```js
     new Vue({
-		el:"div"
-		,data: {
+	el:"div"
+	,data: {
 			
-		}
-		,computed:{
-			styleObject:function(){
-				return{
-					color: 'red',
-	            	fontSize: '13px'
-				}
-			}
-		}
-	})
+	}
+	,computed:{
+	    styleObject:function(){
+	        return{
+		    color: 'red',
+	            fontSize: '13px'
+	        }
+	    }
+	}
+    })
 ```
 
 ##### 数组语法
@@ -408,14 +408,14 @@ Vue 提供一个更通用的方法通过 watch 选项，来响应数据的变化
     <div v-bind:style="[baseStyles,overridingStyles]"></div>
     
     data: {
-		baseStyles: {
+        baseStyles: {
             color: 'red',
             fontSize: '13px'
         },
         overridingStyles: {
-   			textShadow:'4px 2px 2px #333'
+   	    textShadow:'4px 2px 2px #333'
         }
-	}
+    }
 ```
 对于需要前缀的CSS3属性，Vue会自动加上前缀
 
@@ -426,12 +426,12 @@ Vue 提供一个更通用的方法通过 watch 选项，来响应数据的变化
 v-if可以控制单个元素，如果要控制多个元素，可以将template元素作为包装元素，并且使用v-if，包装元素解析出的是虚拟的document.fragment元素，并不会显示出来。
 ```js
     <div id="example">
-		<template v-if="ok">
-			<h1>Title</h1>
-			<p>Paragraph 1</p>
-			<p>Paragraph 2</p>
-		</template>
-	</div>
+	<template v-if="ok">
+	    <h1>Title</h1>
+	    <p>Paragraph 1</p>
+	    <p>Paragraph 2</p>
+	    </template>
+    </div>
 	
     new Vue({
         el:"#example",
@@ -443,13 +443,13 @@ v-if可以控制单个元素，如果要控制多个元素，可以将template�
 #### v-else
 ```js
     <div id="math">
-		<div v-if="Math.random() > 0.5">
-		  	Sorry
-		</div>
-		<div v-else>
-			Not sorry
-		</div>
+        <div v-if="Math.random() > 0.5">
+            Sorry
 	</div>
+	<div v-else>
+	    Not sorry
+	</div>
+    </div>
 	
     new Vue({
         el:"#math"
@@ -493,26 +493,26 @@ Vue会尽可能的复用已有元素而不是重新渲染，这样可以提升�
             <input placeholder="Enter your username" key="username-input">
         </template>
         <template v-else>
-        	<label>Email</label>
-        	<input placeholder="Enter your email address" key="email-input">
+            <label>Email</label>
+            <input placeholder="Enter your email address" key="email-input">
         </template>
     </div>
     <button id="btn" @click="changeloginType">Toggle login type</button>
     
     var div = new Vue({
-		el:"#div",
-		data:{
-			loginType:'username'
-		}
-	})
-	var btn = new Vue({
-		el:"#btn",
-		methods:{
-			changeloginType:function(){
-                /*< !--如何切换状态div.loginType？？ >*/
-			}
-		}
-	})
+	el:"#div",
+	data:{
+	    loginType:'username'
+        }
+    })
+    var btn = new Vue({
+	el:"#btn",
+	methods:{
+	    changeloginType:function(){
+            /*< !--如何切换状态div.loginType？？ >*/
+	    }
+	}
+    })
 ```
 切换Type的过程中并不会删除已经输入的内容，两个模版由于使用了相同的元素，input 会被复用，仅仅是替换了他们的 placeholder。
 
@@ -523,11 +523,11 @@ Vue会尽可能的复用已有元素而不是重新渲染，这样可以提升�
 ```js
     <h1 v-show="ok">Hello!</h1>
     var h1 = new Vue({
-		el:"h1",
-		data:{
-			ok:false
-		}
-	})
+	el:"h1",
+	data:{
+	    ok:false
+	}
+    })
 ```
 不同的是有 v-show 的元素会始终渲染并保持在 DOM 中。v-show 是简单的切换元素的 CSS 属性 display 。
 > 注意 v-show 不支持 <template> 语法。
@@ -546,20 +546,20 @@ Vue会尽可能的复用已有元素而不是重新渲染，这样可以提升�
 #### 基本用法
 ```js
     <ul id="example-1">
-		<li v-for="item of items">
-			{{ item.message }}
-		</li>
-	</ul>
+	<li v-for="item of items">
+	    {{ item.message }}
+	</li>
+    </ul>
 	
-	var example1 = new Vue({
-		el:"#example-1",
-		data:{
-			items:[
-				{message:'Foooo'},
-				{message:'Bar'}
-			]
-		}
-	})
+    var example1 = new Vue({
+	el:"#example-1",
+	data:{
+	    items:[
+	        {message:'Foooo'},
+	        {message:'Bar'}
+	    ]
+	}
+    })
 ```
 在v-for块中，拥有对父作用域属性的完全访问权限，还支持一个可选的第二个参数作为当前项的索引值。
 ```js
@@ -590,14 +590,14 @@ Vue会尽可能的复用已有元素而不是重新渲染，这样可以提升�
     </ul>
     
     var a = new Vue({
-		el:"ul",
-		data:{
-			items:[
-				{ msg: 'leo' },
-				{ msg: 'Messi' }
-			]
-		}
-	})
+        el:"ul",
+	data:{
+	    items:[
+		{ msg: 'leo' },
+		{ msg: 'Messi' }
+	    ]
+	}
+    })
 ```
 带有v-for的template标签来渲染多个元素块，这与v-if条件渲染模板相同。
 
@@ -605,21 +605,21 @@ Vue会尽可能的复用已有元素而不是重新渲染，这样可以提升�
 也可以使用v-for迭代对象的属性
 ```js
     <ul id="repeat-object" class="demo">
-		<li v-for="value in object">
-			{{ value }}
-		</li>
-	</ul>
+	<li v-for="value in object">
+	    {{ value }}
+	</li>
+    </ul>
 	
     new Vue({
-		el:"#repeat-object",
-		data:{
-			object:{
-				firstName:"John",
-				lastName:"Doe",
-				age:30
-			}
-		}
-	})
+	el:"#repeat-object",
+	data:{
+	    object:{
+		firstName:"John",
+		lastName:"Doe",
+		age:30
+	    }
+	}
+    })
 ```
 同样的可以使用键名和索引作为参数，与对象数组不同的是第二个参数是键名，第三个参数是索引。
 ```js
