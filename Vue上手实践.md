@@ -291,7 +291,9 @@ Vue 提供一个更通用的方法通过 watch 选项，来响应数据的变化
 这样的一次请求有几次的中间时态的过渡，这是computed无法做到的(静态，不再渲染)。
 
 ## Class 与 Style绑定
+
 ### 绑定HTML Class
+
 #### 对象语法
 ```js
     <!-- key为类名，isActive如果为true则有active这个类，否则就没有这个类 -->
@@ -416,3 +418,124 @@ Vue 提供一个更通用的方法通过 watch 选项，来响应数据的变化
 	}
 ```
 对于需要前缀的CSS3属性，Vue会自动加上前缀
+
+## 条件渲染
+
+### v-if
+#### <template>v-if条件组
+v-if可以控制单个元素，如果要控制多个元素，可以将template元素作为包装元素，并且使用v-if，包装元素解析出的是虚拟的document.fragment元素，并不会显示出来。
+```js
+    <div id="example">
+		<template v-if="ok">
+			<h1>Title</h1>
+			<p>Paragraph 1</p>
+			<p>Paragraph 2</p>
+		</template>
+	</div>
+	
+    new Vue({
+        el:"#example",
+        data:{
+            ok:true
+        }
+    })
+```
+#### v-else
+```js
+    <div id="math">
+		<div v-if="Math.random() > 0.5">
+		  	Sorry
+		</div>
+		<div v-else>
+			Not sorry
+		</div>
+	</div>
+	
+    new Vue({
+        el:"#math"
+    })
+```
+v-else 元素必须紧跟在 v-if 元素或者 v-else-if的后面——否则它不能被识别。
+
+#### v-else-if
+> 2.1.0新增
+
+```js
+    <div id="div">
+    	<div v-if="type === 'A'">
+    		A
+    	</div>
+    	<div v-else-if="type === 'B'">
+    	  	B
+    	</div>
+    	<div v-else-if="type === 'C'">
+    	  	C
+    	</div>
+    	<div v-else>
+    	  	Not A/B/C
+    	</div>
+    </div>
+    new Vue({
+        el:"#div",
+        data:{
+            type:'k'
+        }
+    })
+```
+与 v-else 相似，v-else-if 必须跟在 v-if 或者 v-else-if之后。
+
+#### 使用 key 控制元素的可重用
+Vue会尽可能的复用已有元素而不是重新渲染，这样可以提升一些性能。
+```js
+    <div id="div">
+        <template v-if="loginType === 'username'">
+            <label>Username</label>
+            <input placeholder="Enter your username" key="username-input">
+        </template>
+        <template v-else>
+        	<label>Email</label>
+        	<input placeholder="Enter your email address" key="email-input">
+        </template>
+    </div>
+    <button id="btn" @click="changeloginType">Toggle login type</button>
+    
+    var div = new Vue({
+		el:"#div",
+		data:{
+			loginType:'username'
+		}
+	})
+	var btn = new Vue({
+		el:"#btn",
+		methods:{
+			changeloginType:function(){
+                /*< !--如何切换状态div.loginType？？ >*/
+			}
+		}
+	})
+```
+切换Type的过程中并不会删除已经输入的内容，两个模版由于使用了相同的元素，input 会被复用，仅仅是替换了他们的 placeholder。
+
+在有些情况下这并不是一个很好的决定，Vue提供一种方式让你决定是否要复用元素。在input中添加一个属性key，并且每个key是唯一的。之后input中的文本都会重新渲染。
+> <lable>仍然会复用，因为它没有添加key属性
+
+### v-show
+```js
+    <h1 v-show="ok">Hello!</h1>
+    var h1 = new Vue({
+		el:"h1",
+		data:{
+			ok:false
+		}
+	})
+```
+不同的是有 v-show 的元素会始终渲染并保持在 DOM 中。v-show 是简单的切换元素的 CSS 属性 display 。
+> 注意 v-show 不支持 <template> 语法。
+
+### v-if 与 v-show
+(1)v-if是真实的渲染与卸载,只不过第一次渲染后,会将结果缓存一下
+(2)v-show元素始终被编译并保留，只是简单地基于 CSS 切换
+(3)总结: 如果需要频繁切换 v-show 较好，如果在运行时条件不大可能改变 v-if 较好
+
+### v-if 与 v-for
+当与v-for一起使用时，v-for具有比v-if更高的优先级。
