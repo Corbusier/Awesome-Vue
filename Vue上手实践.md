@@ -645,4 +645,158 @@ v-for可以取整数，此时它将重复多次模板
 > !!! 暂时跳过 了解组件后再阅读学习
 
 #### v-for 和 v-if
+如果v-for与v-if在同一节点，v-for的优先级更高，条件渲染会等到循环迭代完之后再运行。
+```js
+    <ul>
+        <li v-for="todo in todos" v-if="!todo.isComplete">
+	    {{ todo }}
+	</li>
+    </ul>
+	
+    new Vue({
+	el:"ul",
+	data:{
+	    todos:{
+		firstName:'John',
+		lastName : "Doe",
+		age:30,
+		isComplete:true/false
+	    }
+	}
+    })
+```
+条件渲染会直到每一个循环都结束时才开始执行。所以v-if在这个例子中的作用就是只渲染todos里还未完成的部分，且必须等另一部分已经被v-for先干完才能开始工作。
 
+相反，如果想按条件渲染来跳过循环的执行，可以将v-if放在包装元素中：
+```js
+    <ul v-if="shouldRenderTodos">
+	<li v-for="todo in todos">
+	    {{ todo }}
+	</li>	
+    </ul>
+	
+    new Vue({
+	el:"ul",
+	data:{
+	    shouldRenderTodos:false,
+	    todos:{
+		firstName:'John',
+		lastName : "Doe",
+		age:30
+	    }
+	}
+    })
+```
+#### key
+当Vue使用v-for更新已渲染过的元素列表时，默认"就地复用"策略。如果数据项的顺序被改变，Vue不是操纵DOM元素来配合修改后的顺序，而是复用此处每个元素，并确保它在特定索引下显示被渲染过的每个元素。
+
+这个默认的模式是有效的，但是只适用于不依赖子组件状态或临时DOM状态(例如：表单输入值)的列表渲染输出。为了能跟踪每个节点的身份，然后实现复用和重排序现有元素，需要为每项提供一个唯一的key属性。
+
+建议使用v-for来提供key，除非是DOM特别简单，或者是希望通过默认行为来获得性能提升。
+
+> key的用途在之后还有涉及，暂时先不深入了解
+
+#### 数组更新检测
+##### 变异方法
+ - push()
+ - pop()
+ - shift()
+ - unshift()
+ - splice()
+ - sort()
+ - reverse()
+
+以上的数组在原生方法中都会修改原数组的内容，而在Vue中，它们也会触发视图更新。
+```js
+    <ul id="example-1">
+    	<li v-for="item of items">
+    	    {{ item.message }}
+    	</li>
+    </ul>
+    var example1 = new Vue({
+    	el:"#example-1",
+    	data:{
+    	    items:[
+    	        {message:'Foooo'},
+    	        {message:'Bar'}
+    	    ]
+    	}
+    })
+    /*< !-- 在控制台下输入以下内容 -- >*/
+    example1.items.push({ message: 'Baz' })
+```
+> push方法会引起视图的更新。
+
+##### 重塑数组
+和变异方法相对的是不会改变原数组内容，但总是返回一个新数组的非变异方法。例如：
+filter( )、concat( )、slice( )。使用以上的方法可以用新数组替换旧数组。
+```js
+    example1.items = example1.items.filter(function(item){
+        return item.message.match(/Foo/)
+    }) 
+```
+Vue使用了一些方法来最大化地重用DOM元素，用一个含有相同元素的数组去替代原数组是非常高效的。
+
+#### 注意事项
+由于JS的限制，Vue不能检测以下变动的数组：
+
+1.利用索引直接设置一个项时，例如：
+```js
+    vm.items[indexOfItem] = newValue;
+```
+2.修改数组的长度时，例如：
+```js
+    vm.items.length = newLength;
+```
+为了避免第一种情况，以下两种方式都可以达到第一种的目的，同时触发状态更新：
+```js
+    //Vue.set
+    Vue.set(example1.items,indexOfItem,newValue);
+    
+    //Array.prototype.splice
+    example1.items.splice(indexOfItem,1,newValue)
+```
+避免第二种情况：
+```js
+    example1.items.splice(newLength)
+```
+
+#### 显示过滤/排序结果
+有时想要显示一个数组的过滤或排序副本，但是不修改或重置原始数据。这时可以创建返回过滤或排序数组的计算属性。
+例如：
+```js
+    <ul>
+	<li v-for="n in evenNumbers">{{ n }}</li>
+    </ul>
+    new Vue({
+	el:"ul"
+	,data: {
+	    numbers: [ 1, 2, 3, 4, 5 ]
+	}
+	,computed:{
+	    evenNumbers:function(){
+	        return this.numbers.filter(function(number){
+	            return number % 2 === 0
+	        })
+	    }
+	}
+    })
+```
+也可以在不适用计算属性情况下（例如在嵌套的列表渲染中）使用method方法
+```js
+    <ul>
+        <li v-for="n in even(numbers)">{{ n }}</li>
+    </ul>
+    
+    new Vue({
+	el:"ul"
+	,data: {
+	    numbers: [ 1, 2, 3, 4, 5 ]
+	},
+	methods:{
+	    even:function(numbers){
+	        return numbers.filter( (number) => number %2 === 0 );
+	    }
+	}
+    })
+```
