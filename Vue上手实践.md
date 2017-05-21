@@ -800,3 +800,434 @@ Vue使用了一些方法来最大化地重用DOM元素，用一个含有相同�
 	}
     })
 ```
+
+## 事件处理器
+### 监听事件
+用 v-on 指令监听DOM事件来触发JavaScript代码。
+
+```js
+    <div id="example-1">
+		<button v-on:click="counter += 1">增加1</button>
+		<p>这个按钮被点击了{{ counter }}次</p>
+	</div>
+	
+    var example1 = new Vue({
+	el:'#example-1',
+	data:{
+	    counter: 0
+	}
+    })
+```
+
+### 方法事件处理器
+直接使用行间事件处理对于逻辑复杂的代码时不可行的。因此可以定义一个事件来调用。
+
+```js
+    <div id="example-2">
+	<button v-on:click="greet">Greet</button>
+    </div>
+	
+    var example2 = new Vue({
+	el:"#example-2",
+	data:{
+	    name :"Vue.js"
+	},
+	methods:{
+	    greet:function(ev){
+		alert("Hello" + this.name + "!")
+	        if(ev){
+		    alert(ev.target.tagName.toLowerCase())
+		}
+	    }
+	}
+    })
+```
+
+或者直接调用：
+```js
+    example2.greet();
+```
+
+### 内联处理器方法
+除了绑定一个方法，还可以使用内联JS语句：
+```js
+    <div id="example-3">
+	<button @click="say('hi')">Say hi</button>
+	<button @click="say('what')">Say What</button>
+    </div>
+	
+    new Vue({
+	el:'#example-3',
+	methods:{
+	    say: function(message){
+		alert(message)
+	    }
+	}
+    })
+```
+
+还可以在内联语句处理器中访问原生DOM事件。用特殊的变量$event传入即可：
+
+```js
+    <div id="example-4">
+	<button @click="warn('Form cannot be submitted yet.',$ev)">
+	    Submit
+	</button>
+    </div>
+	
+    new Vue({
+	el:"#example-4",
+	methods:{
+	    warn:function(message,ev){
+		if(ev) ev.preventDefault()
+		alert(message)
+            }
+	}
+    })
+```
+
+### 事件修饰符
+在原生JS中往往需要手动的去处理事件冒泡、阻止默认行为。在Vue中，可以把这些都放到methods中去处理，但是有更好的方式，v-on提供了修饰符来处理DOM事件细节。由点(.)表示的指令后缀来调用修饰符。
+
+ - .stop
+ - .prevent
+ - .capture
+ - .self
+ - .once
+ 
+示例：
+```js
+    <div id="div" @click="clickme">
+	<section id="section" @click.stop="clickme">
+		<p id="p" @click="clickme"> 
+		    <span id="span" @click.once="clickme">
+			<a href="www.baidu.com" title="" @click.prevent="clickme">Click me!</a>
+	        </span>
+	    </p>
+	</section>
+	点击事件的响应顺序如下：{{ message }}
+    </div>
+	
+	var v1 = new Vue({
+	    el:"#div",
+	    data:{
+		message:""
+	    },
+	    methods:{
+		clickme:function(event){
+		    if(this.message === ""){
+			this.message = event.currentTarget.id
+		    }else{
+			this.message = this.message + '->' + event.currentTarget.id
+		    }
+		}
+	    }
+	})
+	
+	/*
+	    如果不采用阻止默认行为，冒泡，那么a会跳转链接，即使阻止后不跳转，那么内容也是 span -> p -> section -> div(冒泡的事件流)	
+	    而如果采用了以上代码的书写，那么结果是 span -> p -> section -> p -> section ...
+	*/
+	
+```
+修饰符的具体作用如下：
+```js
+
+    <!-- 阻止单击事件冒泡 -->
+    <a v-on:click.stop="doThis"></a>
+    
+    <!-- 提交事件不再重载页面 -->
+    <form v-on:submit.prevent="onSubmit"></form>
+    
+    <!-- 修饰符可以串联  -->
+    <a v-on:click.stop.prevent="doThat"></a>
+    
+    <!-- 只有修饰符 -->
+    <form v-on:submit.prevent></form>
+    
+    <!-- 添加事件侦听器时使用事件捕获模式 -->
+    <div v-on:click.capture="doThis">...</div>
+    
+    <!-- 只当事件在该元素本身（而不是子元素）触发时触发回调 -->
+    <div v-on:click.self="doThat">...</div>
+    
+    <!-- 点击事件将只会触发一次 -->
+    <a v-on:click.once="doThis"></a>
+    
+```
+
+### 按键修饰符
+Vue允许v-on在监听键盘事件是添加按键修饰符
+```js
+    <div id="div">
+        <input v-on:keyup.13="fn">
+    </div>
+	
+    var v2 = new Vue({
+	el:"#div",
+	methods:{
+	    fn:function(ev){
+		console.log(ev.keyCode)
+	    }
+	}
+    }) 
+    
+    /*< !-- Vue为常用的按键提供了别名： --  */
+    <!-- 缩写语法 -->
+    <input @keyup.enter="submit">
+```
+
+全部的按键别名：
+
+ - .enter
+ - .tab
+ - .delete (捕获 “删除” 和 “退格” 键)
+ - .up
+ - .down
+ - .left
+ - .right
+ - space
+ 
+还可以通过全局 config.keyCodes 对象自定义按键修饰符别名：
+```js
+    //可以使用 v-on:keyup.f1
+    Vue.config.keyCodes.f1 = 112
+```
+
+> 2.1.0新增
+
+ - .ctrl
+ - .alt
+ - .shift
+ - .meta
+
+### 为什么在 HTML 中监听事件？
+Vue的事件绑定函数都在行间上定义了，或者绑定的是函数名，这样背离了结构、样式、行为分离的传统观点。但是在Vue中事件处理方法和表达式都绑定在当前视图的ViewModel上，不会导致维护上的困难。使用v-on有以下的好处：
+
+ 1. HTML 模板和JS代码的方法两者之间很容易定位
+ 2. 无需在JS中手动绑定事件，ViewModel代码是纯粹的逻辑，和DOM完全解藕，更容易测试。
+ 3. 当ViewModel被销毁时，所有的事件处理器都会被自动移除，有利于释放内存。
+
+## 表单控件绑定
+
+### 基础用法
+使用 v-model 可以在表单控件元素上创建双向数据绑定。
+
+#### 文本
+```js
+    <div>
+	<input v-model="message" placeholder="edit me">
+	<p>Message is : {{ message }}</p>
+    </div>
+    new Vue({
+	el:"div",
+	data:{
+	    message:''
+	}
+    })
+```
+
+#### 多行文本
+```js
+    <div>
+	<span>Multiline message is:</span>
+	<p style="white-space:pre">{{ message }}</p>
+	<br>
+	<textarea v-model="message" placeholder="add multiple lines"></textarea>
+    </div>
+	
+    new Vue({
+	el:"div",
+	data:{
+	    message:''
+	}
+    })
+```
+#### 复选框
+单个勾选框
+```js
+    <div>
+	<input type="checkbox" name="" id="check" v-model="checked">
+	<label for="checkbox">{{ checked }}</label>
+    </div>
+	
+    new Vue({
+	el:"div",
+	data:{
+	    checked:'true'
+	}
+    })
+```
+
+多个勾选框，绑定到同一个数组：
+
+```js   
+    <div id="div">
+	<input type="checkbox" id="jack" value="Jack" v-model="checkedNames">
+	<label for="jack">Jack</label>
+	<input type="checkbox" id="john" value="John" v-model="checkedNames">
+	<label for="john">John</label>
+	<input type="checkbox" id="mike" value="Mike" v-model="checkedNames">
+	<label for="mike">Mike</label>
+	<br>
+	<span>Checked names: {{ checkedNames }}</span>
+    </div>
+	//注意checkedNames是数组
+    new Vue({
+	el: '#div',
+	data:{
+	    checkedNames :[]
+	}
+    })
+```
+ 
+#### 单选按钮
+```js
+    <div>
+	<input type="radio" id="one" value="One" v-model="picked">
+	<label for="one">One</label>
+	<br>
+	<input type="radio" id="two" value="Two" v-model="picked">
+	<label for="two">Two</label>
+	<br>
+	<span>Piced:{{ picked }}</span>
+    </div>
+	
+    new Vue({
+	el:"div",
+	data:{
+	    picked:""
+	}
+    })
+```
+
+#### 选择列表
+
+单选列表：
+
+```js
+    <div>
+        <select v-model="selected">
+	    <option disabled value="">Please select one</option>
+	    <option>A</option>
+	    <option>B</option>
+	    <option>C</option>
+	</select>
+	<span>Selected : {{ selected }}</span>
+    </div>
+	
+    new Vue({
+        el:"div",
+	data:{
+	    selected:""
+	}
+    })
+```
+
+> 如果v-model的初始值没有匹配任何的选项，select元素会渲染为"unselected"状态。在IOS中会导致无法选择第一项，因为这种情况下IOS没有启动change event，因此建议像以上的例子一样，给disabled的option设定一个空值value。
+
+多选列表(绑定到一个数组)：
+```js
+    <div>
+	<select v-model="selected" multiple>
+	    <option>A</option>
+	    <option>B</option>
+	    <option>C</option>
+	</select>
+	<br>
+	<span>Selected:{{ selected }}</span>
+    </div>
+	
+    new Vue({
+	el:"div",
+	data:{
+	    selected:""
+	}
+    })
+```
+
+动态选项，使用v-for列表渲染：
+
+```js
+    <div>
+	<select v-model="selected">
+	    <option v-for="option in options" v-bind:value="option.value">
+		{{ option.text }}
+	    </option>
+	</select>
+	<span>Selected: {{ selected }}</span>
+    </div>
+	
+    new Vue({
+	el:"div",
+	data:{
+	    selected:"A",
+	    options:[
+		{ text: 'One', value: 'A' },
+  		{ text: 'Two', value: 'B' },
+  		{ text: 'Three', value: 'C' }
+	    ]
+	}
+    })
+```
+### 绑定value
+对于单选按钮，勾选框及选择列表选项， v-model 绑定的 value 通常是静态字符串（对于勾选框是逻辑值）：
+```js
+    /* <!-- 当选中时，`picked` 为字符串 "a" --> */
+    <input type="radio" v-model="picked" value="a">
+    
+    /* <!-- 初始时在控制台下输入vm.picked结果为"" 勾选后得到"a" --> */
+    var vm = new Vue({
+	el:"div",
+	data:{
+	    picked:''
+	}
+    })
+	
+    <!-- `toggle` 为 true 或 false -->
+    <input type="checkbox" v-model="toggle">
+    /* <!-- 同上可知，初始时在控制台下输入vm.toggle结果为"" ，
+            勾选后得到"true"，之后为false --> */
+    var vm = new Vue({
+	el:"div",
+	data:{
+	    toggle:''
+	}
+    })
+	
+    <!-- 当选中时，`selected` 为字符串 "abc" -->
+    <select v-model="selected">
+      <option value="abc">ABC</option>
+    </select>
+```
+
+有时候绑定value到实例上的一个动态属性上，可以使用v-bind实现，并且可以不是字符串。
+#### 复选框
+```js
+    <div id="ooo">
+	<input type="checkbox" v-model="toggle" :true-value="a" :false-value="b">
+    </div>
+    var app2 = new Vue({
+        el: '#ooo',
+        data: {
+            toggle: '',
+            a: {
+        	v:"Messi",
+        	champion:"Millan"
+            },
+            b: false
+        }
+    })
+    /* 
+        <!-- 
+             初始时在控制台下输入app2.toggle结果为"" ，勾选后得到的是一个对象
+             Object{__ob__: Observer}，需要再次调用对象的属性才能获取值
+             再次输入app2.toggle.v
+             "Messi"
+             app2.toggle.champion
+             "Millan"
+        -->
+    */
+```
+
+#### 单选按钮
