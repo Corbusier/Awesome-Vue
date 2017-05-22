@@ -1235,3 +1235,179 @@ Vue的事件绑定函数都在行间上定义了，或者绑定的是函数名�
 ```
 
 #### 单选按钮
+```js
+    <div id="ooo">
+	    <input type="radio" v-model="pick" :value="a">
+	</div>
+	var app2 = new Vue({
+        el: '#ooo',
+        data: {
+           	pick: '',
+           	a:"leo"
+        }
+    })
+```
+
+#### 选择列表设置
+```js
+    <div id="ooo">
+	    <select v-model="selected">
+	    	<option :value="{ number:123 }">123</option>
+	    </select>
+	</div>
+	
+	var app2 = new Vue({
+        el: '#ooo',
+        data:{
+           	selected:[]
+        }
+    })
+    //当选中时
+    typeof app2.selected //'object'
+    app2.selected.num //"123"
+```
+### 修饰符
+#### .lazy
+默认情况下，v-model会使用双向绑定，同步输入框的值与数据，而使用该修饰符可以变为在 change 事件中才发生同步：
+```js
+    <div id="ooo">
+	    <input v-model.lazy="msg" >
+	    <p>{{ msg }}</p>
+	</div>
+	/*输入完成之后enter才可以同步*/
+	var app2 = new Vue({
+        el: '#ooo',
+        data: {
+           msg:''	
+        }
+    })
+```
+
+#### .number
+如果想自动将用户的输入值转为 Number 类型（如果原值的转换结果为 NaN 则返回原值），可以添加一个修饰符 number 给 v-model 来处理输入值：
+```js
+    /*
+        此处和文档有出入，默认text类型input下.number修饰符是有效的，
+        number类型input输入e会value会被清空
+    */
+    <input v-model.number="age">
+```
+#### .trim
+如果要自动过滤用户输入的首尾空格，可以添加 trim 修饰符到 v-model 上过滤输入：
+```js
+    /*此处和文档也有出入，无效！*/
+    <input v-model.trim="msg">
+```
+
+## 组件
+### 什么是组件？
+有了一些模块化的基础认识，再来看组件，理解起来应该是组件更强调复用，并没有上下级的包含关系。模块强调的是高内聚，低耦合，而组件则显得更加松散，这样才可以更容易运用到项目中去。
+
+### 使用组件
+#### 注册
+可以通过构造函数的方式创建一个Vue实例：
+```js
+    new Vue({
+        el:"#some-element"
+    })
+```
+如果要注册全局组件，可以使用Vue.component(tagName,options)，例如：
+```js
+    Vue.component('my-component', {
+      // 选项
+    })
+```
+组件在注册之后就可以在父实例的模块中以自定义元素 my-component 的形式使用。在初始化根实例之前注册了组件：
+```js
+    <div id="example">
+        <my-component></my-component>
+    </div>
+    //注册
+    Vue.component("my-component",{
+        template:'<div>A custom component!</div>'
+    })
+    //创建根实例
+    new Vue({
+        el:"#example"
+    })
+```
+渲染为：
+```js
+    <div id="example">
+        <div>A custom component!</div>
+    </div>
+```
+
+#### 局部注册
+不必在全局注册每个组件。通过实例选项注册，可以使组件在另一个实例、组件的作用域中可用：
+```js
+    var Child = {
+        template:'<div>A custom component!</div>'
+    }
+    
+    /*注意该选项是components*/
+    new Vue({
+        el:"#example",
+        components:{
+            'my-component':Child
+        }
+    })
+```
+这种封装也适用于其他可注册的Vue功能，比如指令。
+
+#### DOM模板解析说明
+
+当使用DOM作为模板（将el选项挂载到一个已存在的元素上），这样会受到HTML的一些限制，因为Vue只会在浏览器解析或标准化HTML之后才能获取模板内容。而且有些元素限制了能被它包裹的元素，option只能出现在其他元素的内部。
+
+在自定义组件时，使用受限制的元素会导致一些问题：
+
+```js
+    <table>
+        <my-row>...</my-row>
+    </table>
+```
+自定义组件 my-row会被认为是无效的内容，导致渲染错误。解决方式是使用特殊的 is 属性：
+
+```js
+    <table>
+        <tr is="my-row"></tr>
+    </table>
+```
+如果使用来自以下来源之一的字符串模板，则可以突破限制：
+
+ - <script type="text/x-template">
+ - JavaScript内联模版字符串
+ - .vue 组件
+
+#### data 必须是函数
+使用组件时，传入到Vue构造函数中的选项可以在注册组件时使用，但有一个例外是， data 必须是函数。理解的过程：
+```js
+    <div id="example-2">
+		<simple-counter></simple-counter>
+		<simple-counter></simple-counter>
+		<simple-counter></simple-counter>
+	</div>
+	
+	var data = { counter: 0 }
+	Vue.component('simple-counter', {
+		template: '<button v-on:click="counter += 1">{{ counter }}</button>',
+		// data 是一个函数，因此 Vue 不会警告，
+		// 但是我们为每一个组件返回了同一个对象引用
+		data:function (){
+			return data
+		}
+	})
+	new Vue({
+		el: '#example-2'
+	})
+```
+而数据引用同一个对象的结果就是，button中的数值会保持"同步"，这显然不是我们期望看到的。通过为每个组件返回新的对象来解决这个问题，这样每个counter都拥有自己内部的状态：
+```js
+    data:function(){
+        return {
+            counter: 0
+        }
+    }
+```
+
+#### 构成组件
