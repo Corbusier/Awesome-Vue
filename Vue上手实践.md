@@ -1383,23 +1383,23 @@ Vue的事件绑定函数都在行间上定义了，或者绑定的是函数名�
 使用组件时，传入到Vue构造函数中的选项可以在注册组件时使用，但有一个例外是， data 必须是函数。理解的过程：
 ```js
     <div id="example-2">
-		<simple-counter></simple-counter>
-		<simple-counter></simple-counter>
-		<simple-counter></simple-counter>
-	</div>
+	<simple-counter></simple-counter>
+	<simple-counter></simple-counter>
+        <simple-counter></simple-counter>
+    </div>
 	
-	var data = { counter: 0 }
-	Vue.component('simple-counter', {
-		template: '<button v-on:click="counter += 1">{{ counter }}</button>',
-		// data 是一个函数，因此 Vue 不会警告，
-		// 但是我们为每一个组件返回了同一个对象引用
-		data:function (){
-			return data
-		}
-	})
-	new Vue({
-		el: '#example-2'
-	})
+    var data = { counter: 0 }
+    Vue.component('simple-counter', {
+	template: '<button v-on:click="counter += 1">{{ counter }}</button>',
+	// data 是一个函数，因此 Vue 不会警告，
+	// 但是我们为每一个组件返回了同一个对象引用
+	data:function (){
+	    return data
+	}
+    })
+    new Vue({
+	el: '#example-2'
+    })
 ```
 而数据引用同一个对象的结果就是，button中的数值会保持"同步"，这显然不是我们期望看到的。通过为每个组件返回新的对象来解决这个问题，这样每个counter都拥有自己内部的状态：
 ```js
@@ -1411,3 +1411,262 @@ Vue的事件绑定函数都在行间上定义了，或者绑定的是函数名�
 ```
 
 #### 构成组件
+组件之间需要协同工作，组件A在模板中使用组件B，他们之间需要相互通信，父组件给子组件传递数据，子组件需要将内部发生的告知给父组件。而组件之间的解耦也是很重要的，保证每个组件可以在相对隔离的环境中书写和理解，增加组建的可维护性和可复用性。
+
+在Vue中父组件通过props向下传递数据给子组件，子组件通过events给父组件发送消息。
+
+### Prop
+
+#### 使用Prop传递数据
+
+组件实例的作用域是孤立的，这意味着不能且不应该在子组件的模板内直接引用父组件的数据。可以使用 props 把数据传递给子组件。
+
+prop是父组件传递数据的一个自定义属性。子组件需要显式地用 prop 选项声明"prop"：
+
+```js
+    <div id="app">
+	<child message="hello!"></child>
+    </div>
+    /* < ! -- 切记创建根实例之前注册组件！  -- > */
+    Vue.component('child',{
+	props:['message'],
+	template:'<span>{{ message }}</span>'
+    })
+    new Vue({
+	el:"#app"
+    })
+```
+
+#### 短横线命名式 VS 驼峰命名式
+
+HTML特性是不区分大小写，所以使用非字符串模板时，驼峰式命名的 prop 需要转换为相应的短横线命名式：
+```js
+    <div id="app">
+	<child my-message="hello!"></child>
+    </div>
+	
+    Vue.component('child', {
+    // camelCase in JavaScript
+	props: ['myMessage'],
+        template: '<span>{{ myMessage }}</span>'
+    })
+    new Vue({
+        el:"#app"
+    })
+```
+
+> 如果使用字符串模板，可以不遵守这些限制！
+
+#### 动态Prop
+
+与 v-bind 绑定HTML特性到表达式类似，也可以使用 v-bind 动态绑定 props 的值到父组件的数据中。每当父组件的数据变化时，该变化也会传导给子组件：
+```js
+    <div id="app">
+	<input v-model="parentMsg">
+	<br>
+	<child :my-message="parentMsg"></child>
+    </div>
+	
+    Vue.component('child', {
+	props: ['myMessage'],
+	template: '<span>{{ myMessage }}</span>'
+    })
+    new Vue({
+	el:"#app",
+	data:{
+	    parentMsg : 'Message from parent'
+	}
+    })
+```
+
+#### 字面量语法 VS 动态语法
+
+如果使用字面量，那么它的值是以字符串"1"传递下去，而不是实际的数字。
+```js
+    /* <!-- 传递了一个字符串"1" --> */
+    <comp some-prop="1"></comp
+```
+如果想传递实际的数字，那么需要动态的绑定数据，使这个值被当做JS表达式计算：
+```js
+    /* <!-- 传递实际的数字 --> */
+    <comp :some-prop="1"></comp>
+```
+
+简单理解就是：
+（1）、不加 v-bind 传递的就是字符串，哪怕是数字1，也是一个字符串，而不是Number
+（2）、加 v-bind 传递的就是Javascript 表达式，这样才能传递父组件中的值
+（3）、加 v-bind 以后，如果能找到父组件的值，就使用父组件的值；如果找不到i，就看成是一个Javascript 表达式（例如1+2看做3，{a:1}看做是一个对象）
+
+#### 单向数据流
+prop 是单向绑定：当父组件变化时会传递给子组件，但是相反的方向并不会引起改变。每次父组件数据更新时，子组件的所有 prop 都会更新为最新值。这也意味着不应该在组件内部改变 prop。如果这么做了，Vue会在控制台给出警告。
+
+```js
+    <div id="app">
+	    父组件：
+	    <input v-model="msg">
+	    <hr>
+	    子组件：
+	    <child :message="msg"></child>
+	</div>
+	
+	var vm = new Vue({
+        el:'#app',
+        data:{
+            msg:'Hello World'
+        },
+        components:{
+            'child':{
+                props:['message'],
+                template:'<input v-model="message">'
+            }
+        }
+    })
+```
+当父组件数据改变时，子组件内容也会变化，但是如果反过来修改子组件的值，控制台就会报错。
+
+通常有两种改变 prop 的情况：
+
+ 1. prop 作为初始值传入，子组件之后只是将它的初始值作为本地数据的初始值使用；
+ 2. prop 作为需要被转变的原始值传入。
+ 
+更确切的说这两种情况是：
+
+1.定义一个局部 data 属性，并将 prop 的初始值作为局部数据的初始值。
+
+```js
+    props:['initialCounter'],
+    data:function(){
+        return { 
+            counter: this.initialCounter 
+        }
+    }
+```
+
+2.定义一个 computed 属性，此属性从 prop 的值计算得出。
+```js
+    props: ['size'],
+    computed: {
+        normalizedSize:function(){
+            return this.size.trim().toLowerCase()
+        }
+    }
+```
+> 在JavaScript中对象和数组是引用类型，指向同一个内存空间，如果prop是一个对象或数组，在子组件内部改变它会影响父组件的状态。
+
+> ！！！改变 prop 的两种情况没理解，过后再深入思考
+
+#### Prop验证
+组件可以为 props 指定验证请求。如果未指定验证要求，Vue会发出警告。
+prop是一个对象而不是字符串数组时，它包含验证要求：
+
+```js
+    Vue.component('example',{
+        props:{
+            propA:Number,
+            propB:[String,Number],
+            propC:{
+                type:String,
+                required:true
+            },
+            propD:{
+                type:Number,
+                default:100
+            },
+            propE:{
+                type:Object,
+                default:function(){
+                    return{
+                        message:'hello'
+                    }
+                }
+            },
+            propF:{
+                validator:function(value){
+                    return value > 10
+                }
+            }
+        }
+    })
+```
+type 可以是下面原生构造器：
+
+ - String
+ - Number
+ - Boolean
+ - Function
+ - Object
+ - Array
+ 
+type 也可以是一个自定义构造器，使用 instanceof 检测。
+当 prop 验证失败了，如果使用的是开发版本会抛出一条警告。
+
+总结：子组件如果要想获取父组件data，在调用子组件时，
+```js
+    //在调用子组件：
+    <someElement :m='数据'></someElement>
+    
+    //子组件内：
+    props:['m','myMsg']
+    
+    props:{
+        'm':String,
+        'myMsg':Number
+    }
+```
+
+### 自定义事件
+父组件可以使用 props 传递数据给子组件，但如果子组件要把数据传递回去，就需要自定义事件。
+
+#### 使用 v-on 绑定自定义事件
+每个Vue实例都实现了**事件接口**：
+
+ - 使用$on(eventName)监听事件
+ 
+ - 使用 $emit(eventName) 触发事件
+ 
+
+> Vue的事件系统分离自浏览器的EventTarget API。尽管它们的运行类似，但是$on 和 $emit 不是addEventListener 和 dispatchEvent 的别名。
+
+另外，父组件可以在使用子组件的地方直接用 v-on 来监听子组件触发的事件。
+
+示例一：
+```js
+    <div id="app">
+        父组件：<br>
+        <p>{{total}}</p>
+        子组件：<br>
+        <button-counter @increment="incrementTotal"></button-counter>
+        <button-counter @increment="incrementTotal"></button-counter>
+    </div>
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            total: 0
+        },
+        methods: {
+            incrementTotal: function() {
+                this.total += 1;
+            }
+        },
+        components: {
+            'button-counter': {
+                props: [],//父组件并没有往子组件传出数据，所以不需要
+                template: '<button @click="increment">{{ counter }}</button>',
+                data: function() {//data必须是一个函数并返回一个对象
+                    return {
+                        counter: 0
+                    }
+                },
+                methods: {
+                    increment: function() {
+                        this.counter += 1;
+                        this.$emit('increment');
+                    }
+                }
+            }
+        }
+    })
+```
+
+这个例子中，子组件已经完全和它外部完全解耦了。它所做的只是触发一个父组件关心的内部事件
+
