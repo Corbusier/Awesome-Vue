@@ -1670,3 +1670,330 @@ type 也可以是一个自定义构造器，使用 instanceof 检测。
 
 这个例子中，子组件已经完全和它外部完全解耦了。它所做的只是触发一个父组件关心的内部事件
 
+##### 给组件绑定原生事件
+有时候，你可能想在某个组件的根元素上监听一个原生事件。可以使用 .native 修饰 v-on 。例如：
+```js
+    <my-component v-on:click.native="doTheThing"></my-component>
+```
+
+#### 使用自定义事件的表单输入组件
+
+自定义事件也可以用来创建自定义的表单输入组件，使用 v-model 来进行数据双向绑定。
+要让组件的 v-model 生效，它应该:
+
+ - 接受一个 value 属性
+ - 在有新的 value 时触发 input 事件
+ 
+注意引用了 rawGit 转换后的gitHub上的第三方代码：`https://cdn.rawgit.com/chrisvfritz/5f0a639590d6e648933416f90ba7ae4e/raw/98739fb8ac6779cb2da11aaa9ab6032e52f3be00/currency-validator.js`
+
+```js
+    <div id="app">
+        <currency-input 
+            label="Price" 
+            v-model="price"
+        >
+        </currency-input>
+        <currency-input 
+            label="Shipping" 
+            v-model="shipping"
+        >           
+        </currency-input>
+        <currency-input 
+            label="Handling" 
+            v-model="handling"
+        >
+        </currency-input>
+        <currency-input 
+            label="Discount" 
+            v-model="discount"
+        >          
+        </currency-input>
+      <p>Total: ${{ total }}</p>
+    </div>
+    <script src="https://cdn.rawgit.com/chrisvfritz/5f0a639590d6e648933416f90ba7ae4e/raw/98739fb8ac6779cb2da11aaa9ab6032e52f3be00/currency-validator.js"></script>
+    <script>
+        Vue.component('currency-input',{
+            template: '\
+                <div>\
+                    <label v-if="label">{{ label }}</label>\
+                    $\
+                    <input\
+                        ref="input"\
+                        v-bind:value="value"\
+                        v-on:input="updateValue($event.target.value)"\
+                        v-on:focus="selectAll"\
+                        v-on:blur="formatValue"\
+                    >\
+                </div>\
+            ',
+            props: {
+                value:{
+                    type: Number,
+                    default: 0
+                },
+                label: {
+                    type: String,
+                    default: ''
+                }
+            },
+            mounted: function () {
+                this.formatValue()
+            },
+            methods: {
+                updateValue: function(value){
+                    var result = currencyValidator.parse(value, this.value)
+                    if (result.warning) {
+                        this.$refs.input.value = result.value
+                    }
+                        this.$emit('input',result.value)
+                },
+                formatValue: function () {
+                    this.$refs.input.value = currencyValidator.format(this.value)
+                },
+                selectAll: function (event){
+                // Workaround for Safari bug
+                // http://stackoverflow.com/questions/1269722/selecting-text-on-focus-using-jquery-not-working-in-safari-and-chrome
+                    setTimeout(function () {
+                        event.target.select();
+                    },0)
+                }
+            }
+        })
+
+        new Vue({
+            el: '#app',
+            data: {
+                price: 0,
+                shipping: 0,
+                handling: 0,
+                discount: 0
+            },
+            computed: {
+                total: function (){
+                    return ((
+                        this.price * 100 + 
+                        this.shipping * 100 + 
+                        this.handling * 100 - 
+                        this.discount * 100
+                    ) / 100).toFixed(2)
+                }
+            }
+        })
+```
+
+> ！！！先不要求完整看懂，需要知道几点： props 验证、双向绑定、自定义事件表单组件。
+
+> 核心的两步：vm.$emit(自定义事件名, 数据)  <!-- 自定义事件名不推荐驼峰命名法-->
+              v-on:自定义事件名= 方法
+
+
+### 使用 Slot 分发内容
+在使用组件时，有时需要组合他们使用，需要注意两点
+```js
+    <app>
+        <app-header></app-header>
+        <app-footer></app-footer>
+    </app>
+```
+
+ 1. app 组件不知道它的挂载点会有什么内容。挂载点的内容是由<app>的父组件决定的。
+ 2. app 组件很可能有它自己的模版。
+
+原文档之后的解释并不特别清晰，直接来一段代码理解：
+```js
+    <div id="app">
+        <parent>
+            <div>
+                <ul>
+                    <li>苹果</li>
+                    <li>香蕉</li>
+                    <li>橙子</li>
+                </ul>
+            </div>
+        </parent>
+    </div>
+    
+    var vm = new Vue({
+        el:'#app',
+        components:{
+            'parent':{
+                template:'<h1>水果，水果，在哪里？</h1>'
+            }
+        }
+    })
+```
+打开审查元素可以看到，结构中有子组件中定义的模板 h1 并没有ul元素。解决的方式就是使用**内容分发**。文档中提到的 slot 插槽。简单的意思就是占个位置。
+
+#### 1.单个slot
+ 除非子组件模板包含 slot，否则父组件的内容将被抛弃。如果子组件模板只有一个没有疼特性的 slot，父组件的整个内容将插入 slot 所在位置，并替换。
+ 
+将以上例子的代码修改：
+
+```js
+    <div id="app">
+        <parent>
+            <div>
+                <ul>
+                    <li>苹果</li>
+                    <li>香蕉</li>
+                    <li>橙子</li>
+                </ul>
+            </div>
+        </parent>
+    </div>
+    <template id="fruit">
+        <div>
+            <h1>水果，水果，在哪里？</h1>
+            <slot></slot>
+        </div>
+    </template>
+    var vm = new Vue({
+        el:'#app',
+        components:{
+            'parent':{
+                template:'#fruit'
+            }
+        }
+    })
+```
+slot 标签的内容视为回退内容，它在子组件的作用域内编译，当宿主元素为空并且没有内容插入时，显示这个回退内容。也就是说，在父组件 parent 内容为空时，slot中的内容会插入这个空位。
+
+#### 2.具名slot
+slot 元素可以用一个特殊特性 name 配置如何分发内容，多个 slot 可以有不同的名字，具名的 slot 将匹配内容片段中有对应 slot 特性的元素。
+
+仍然可以有一个匿名 slot，作为找不到匹配的内容片段的回退插槽，它是默认 slot。如果没有默认 slot，这些找不到匹配的内容片段将被抛弃。
+
+```js
+    <div id="app">
+        <parent>
+            <div>
+                <ul slot="fruit-slot">
+                    <li>苹果</li>
+                    <li>香蕉</li>
+                    <li>橙子</li>
+                </ul>
+                <ul slot="turnip-slot">
+                    <li>白萝卜</li>
+                    <li>红萝卜</li>
+                    <li>绿萝卜</li>
+                </ul>
+            </div>
+        </parent>
+        <hr>
+        <parent>
+     
+        </parent>
+    </div>
+    <template id="fruit">
+        <div>
+            <h1>水果，水果，在哪里？</h1>
+            <slot name="fruit-slot">默认情况一</slot>
+            <slot>默认情况下</slot>
+            <slot name="turnip-slot">默认情况二</slot> 
+        </div>
+    </template>
+    
+    var vm = new Vue({
+        el:'#app',
+        components:{
+            'parent':{
+                template:'#fruit'
+            }
+        }
+    })
+```
+slot 元素为空时则无效，还有一点就是同一级具名 slot 会匹配对应的内容，如果匹配项之一与 parent 内的不符，那么以具名 slot 中的内容为准，比如：
+```js
+    <parent>
+        <div>
+            <ul slot="fruit-slot">
+                <li>苹果</li>
+                <li>香蕉</li>
+                <li>橙子</li>
+            </ul>
+            <span>
+                
+            </span>
+            <ul slot="turnip-slot">
+                <li>白萝卜</li>
+                <li>红萝卜</li>
+                <li>绿萝卜</li>
+            </ul>
+        </div>
+    </parent>
+    <template id="fruit">
+        <div>
+            <h1>水果，水果，在哪里？</h1>
+            <slot name="fruit-slot">默认情况一</slot>
+            <slot name="fru">默认情况下</slot>
+            <slot name="turnip-slot">默认情况二</slot> 
+        </div>
+    </template>
+```
+修改后的具名 slot 与上面的内容不能完全匹配，最终得到的结果是具名 slot 中的内容，并**不包含** ul 列表元素的任何元素。
+
+### 动态组件
+多个组件可以使用同一个挂载点，然后动态地在它们之间切换。使用保留的 component 元素，动态地绑定到它的 is 特性
+```js
+    <component :is="组件名称"></component>
+```
+
+示例一：
+```js
+    <div id="app">
+        <div class="radio">
+            <label for="one">
+                <input type="radio" id="one" value="fast" v-model="currentView"> Six
+            </label>
+        </div>
+        <div class="radio">
+            <label for="two">
+                <input type="radio" id="two" value="bus" v-model="currentView"> Thirteen
+            </label>
+        </div>
+        <div class="radio">
+            <label for="three">
+                <input type="radio" id="three" value="business" v-model="currentView"> Eight
+            </label>
+        </div>
+        <fast v-show="show"></fast>
+     
+        <bus v-show="show"></bus>
+     
+        <business v-show="show"></business>
+     
+        <component :is="currentView">
+            /* <!--组件在 vm.currentView 变化时改变--> */
+        </component>
+    </div>
+    
+    var vm = new Vue({
+        el:'#app',
+        data:{
+            currentView:'fast',
+            show:false
+        },
+        components:{
+            'fast':{
+                template:'<h2>朝阳门</h2>'
+            },
+            'bus':{
+                template:'<h2>望京</h2>'
+            },
+            'business':{
+                template:'<h2>森林公园</h2>'
+            }
+        }
+    })
+```
+
+通过 is 属性绑定 currentView 值，点击选项时，切换展示的组件。
+
+#### keep-alive
+在动态组件之后增加该属性，切换时之前的组件将保留在内存中，避免页面的重复渲染，提升视图更新的性能。
+
+```js
+    <component :is="currentView" kepp-alive>
+        /* <!--组件在 vm.currentView 变化时改变--> */
+    </component>
+```
