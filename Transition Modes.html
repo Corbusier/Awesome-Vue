@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>过渡效果-多个元素的过渡</title>
+  <style>
+      /*淡入淡出按钮,这个使得按钮的效果很差*/
+      /*在 “on” 按钮和 “off” 按钮的过渡中，两个按钮都被重绘了，一个离开过渡的时候另一个开始进入过渡。这是 <transition> 的默认行为 - 进入和离开同时发生。*/
+      .fade-enter-active,.fade-leave-active{
+        transition: all .5s
+      }
+      .fade-enter,.fade-leave-active{
+        opacity: 0
+      }
+      /*淡入淡出+绝对定位*/
+      #app2{
+        position: relative;
+        height: 100px;
+        width: 100px;
+        background:green;
+      }
+      #app2 button{
+        position: absolute;
+        left:50%;
+        top: 50%;
+      }
+      .fade-abosolute-enter,.fade-abosolute-leave-active{
+        opacity: 0
+      }
+      .fade-abosolute-enter-active,.fade-abosolute-leave-active{
+        transition: all 1s
+      }
+      /*淡入淡出+绝对定位+滑动效果*/
+      /*这三种效果合在一起，产生的效果是比较好的*/
+      #app3{
+        width: 200px;
+        height: 100px;
+        background: rgb(26, 46, 224);
+        position: relative;
+      }
+      #app3 button{
+        position: absolute;
+        left: 50%;
+        top: 50%;
+      }
+      .fade-slide-enter-active,.fade-slide-leave-active{
+        transition: all 1s
+      }
+      .fade-slide-enter{
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      .fade-slide-leave-active{
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      #app4{
+        position: relative;
+        width: 200px;
+        height: 100px;
+        background: rgb(8, 201, 80);
+      }
+      #app4 button{
+        position: absolute;
+        left: 50%;
+        top: 50%;
+      }
+      .fade-slide-mode-enter-active,.fade-slide-mode-leave-active{
+        transition: all .5s
+      }
+      .fade-slide-mode-enter{
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      .fade-slide-mode-leave-active{
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+  </style>
+</head>
+<body>
+    <!--   淡入淡出按钮,这个使得按钮的效果很差 -->
+    <div id="app1">
+      <!-- 这个淡出淡出效果，在原本没加上过渡模式的时候效果非常糟糕，在加入了mode="out-in"之后，效果比较好，out-in指的是先过渡现有的元素，在过渡新元素 -->
+      <transition name="fade" mode="out-in">
+          <button v-if="isEditing" key="save" @click="isEditing = !isEditing">
+            save
+          </button>
+          <button v-else key="edit" @click="isEditing = !isEditing">
+            Edit
+          </button>
+      </transition>
+    </div>
+    <!-- 淡入淡出+绝对定位 -->
+    <div id="app2">
+      <transition name="fade-abosolute">
+        <button v-if="on" key="on" @click="on = !on">
+          on
+        </button>
+        <button v-else key="off" @click="on = !on">
+          off
+        </button>
+      </transition>
+    </div>
+    <!-- 淡入淡出+绝对定位+滑动 -->
+    <div id="app3">
+      <transition name="fade-slide">
+        <button v-if="on" key="on" @click="on = !on">
+          on
+        </button>
+        <button v-else key="off" @click="on = !on">
+          off
+        </button>
+      </transition>
+    </div>
+    <!-- in-out,out-in的过渡模式，同时生效的进入和离开的过渡不能满足所有要求，所以vue提供了过渡模式 -->
+    <div id="app4">
+      <transition name="fade-slide-mode" mode="in-out">
+        <button v-if="on" key="on" @click="on = !on">
+          on
+        </button>
+        <button v-else key="off" @click="on = !on">
+          off
+        </button>
+      </transition>
+    </div>
+</body>
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<script type="text/javascript">
+    var vm1 = new Vue({
+      el:'#app1',
+      data(){
+        return{
+          isEditing:true,
+        }
+      }
+    })
+    var vm2 = new Vue({
+      el:'#app2',
+      data(){
+        return {
+          on:true
+        }
+      }
+    })
+    var vm3 = new Vue({
+      el:'#app3',
+      data(){
+        return {
+          on:true
+        }
+      }
+    })
+    var vm4 = new Vue({
+      el:'#app4',
+      data(){
+        return {
+          on:true
+        }
+      }
+    })
+</script>
+</html>
