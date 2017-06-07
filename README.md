@@ -16,3 +16,4 @@
 ## Vue 进阶篇
 
 - [深入响应式原理](https://github.com/Corbusier/Awesome-Vue/issues/8)
+- [过渡效果](https://github.com/Corbusier/Awesome-Vue/issues/9)
