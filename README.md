@@ -13,5 +13,6 @@
 - [表单控件绑定](https://github.com/Corbusier/Awesome-Vue/issues/6)
 - [组件](https://github.com/Corbusier/Awesome-Vue/issues/7)
 
+## Vue 进阶篇
 
-
+- [深入响应式原理](https://github.com/Corbusier/Awesome-Vue/issues/8)
