@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        
+    </style>
+</head>
+    <body>
+        <div id="example-8">
+            <input v-model.number="firstNumber" type="number" step="20"> +
+            <input v-model.number="secondNumber" type="number" step="20"> =
+                {{ result }}
+            <p>
+                <animated-integer v-bind:value="firstNumber"></animated-integer> +
+                <animated-integer v-bind:value="secondNumber"></animated-integer> =
+                <animated-integer v-bind:value="result"></animated-integer>
+            </p>
+        </div>
+    <script src="https://unpkg.com/tween.js@16.3.4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenLite.min.js"></script>
+    <script src="https://unpkg.com/color-js@1.0.3/color.js"></script>
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <script>
+        Vue.component('animated-integer', {
+            template: '<span>{{ tweeningValue }}</span>',
+            props: {
+                value: {
+                    type: Number,
+                    required: true
+                }
+            },
+            data: function () {
+                return {
+                    tweeningValue: 0
+                }
+            },
+            watch: {
+                value: function (newValue, oldValue){
+                    this.tween(oldValue, newValue)
+                }
+            },
+            mounted: function () {
+                this.tween(0, this.value)
+            },
+            methods: {
+                    tween: function (startValue, endValue) {
+                    var vm = this
+                    function animate (time) {
+                    requestAnimationFrame(animate)
+                    TWEEN.update(time)
+                }
+                new TWEEN.Tween({ tweeningValue: startValue })
+                    .to({ tweeningValue: endValue }, 500)
+                    .onUpdate(function () {
+                        vm.tweeningValue = this.tweeningValue.toFixed(0)
+                    })
+                    .start()
+                animate()
+                }
+            }
+        })
+        // All complexity has now been removed from the main Vue instance!
+        new Vue({
+            el: '#example-8',
+            data: {
+                firstNumber: 20,
+                secondNumber: 40
+            },
+            computed: {
+                result: function () {
+                    return this.firstNumber + this.secondNumber
+                }
+            }
+        })
+    </script>
+    </body>
+</html> 
