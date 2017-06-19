@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Simply-Calculator</title>
+	<link rel="stylesheet" type="text/css" href="css/index.css">
+</head>
+<body>
+	<div id="calculator">
+	    <input-box :input-show="inputShow"></input-box>
+	    <btn-group>
+	    	<div @click="operator('clear')" class="btn-30 btn-radius color-red clear-marginleft">
+	    		C
+	    	</div>
+	    	<div @click="operator('opposite')" class="btn-30 btn-radius color-blue">
+	    		+/-
+	    	</div>
+	    	<div @click="operator('percent')" class="btn-30 btn-radius color-blue">
+	    		%
+	    	</div>
+	    	<div @click="operator('backspace')" class="btn-70 btn-radius color-red font-14">
+	    		←
+	    	</div>
+	    	<div @click="numbertoinput('7')" class="btn-30 btn-radius clear-marginleft">
+	    		7
+	    	</div>
+	    	<div @click="numbertoinput('8')" class="btn-30 btn-radius">
+	    		8
+	    	</div>
+	    	<div @click="numbertoinput('9')" class="btn-30 btn-radius">
+	    		9
+	    	</div>
+	    	<div @click="operator('plus')" class="btn-30 btn-radius color-blue font-14">
+	    		+
+	    	</div>
+	    	<div @click="operator('minus')" class="btn-30 btn-radius color-blue font-14">
+	    		-
+	    	</div>
+	    	<div @click="numbertoinput('4')" class="btn-30 btn-radius clear-marginleft">
+	    		4
+	    	</div>
+	    	<div @click="numbertoinput('5')" class="btn-30 btn-radius">
+	    		5
+	    	</div>
+	    	<div @click="numbertoinput('6')" class="btn-30 btn-radius">
+	    		6
+	    	</div>
+	    	<div @click="operator('multiply')" class="btn-30 btn-radius color-blue font-14">
+	    		×
+	    	</div>
+	    	<div @click="operator('divide')" class="btn-30 btn-radius color-blue font-14">
+	    		/
+	    	</div>
+	    	<div @click="numbertoinput('1')" class="btn-30 btn-radius clear-marginleft">
+	    		1
+	    	</div>
+	    	<div @click="numbertoinput('2')" class="btn-30 btn-radius">
+	    		2
+	    	</div>
+	    	<div @click="numbertoinput('3')" class="btn-30 btn-radius">
+	    		3
+	    	</div>
+	    	<div @click="operator('pow')" class="btn-30 btn-radius color-blue font-14">
+	    		×²
+	    	</div>
+	    	<div @click="operator('sqrt')" class="btn-30 btn-radius color-blue font-12">
+	    		√
+	    	</div>
+	    	<div @click="numbertoinput('0')" class="btn-70 btn-radius clear-marginleft">
+	    		0
+	    	</div>
+	    	<div @click="numbertoinput('.')" class="btn-30 btn-radius">
+	    		.
+	    	</div>
+	    	<div @click="operator('result')" class="btn-70 btn-radius color-red font-14">
+	    		=
+	    	</div>
+	    </btn-group>
+	</div>
+	<script src="https://unpkg.com/vue/dist/vue.js"></script>
+	<script type="text/javascript" src="js/index.js"></script> 
+</body>
+</html>
