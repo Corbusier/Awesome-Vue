@@ -36,13 +36,13 @@
 截取demo中一段代码：
 ```js
     Exponentiation:function(){
-		var n1 = (this.result(this.string)[0]).toString().split(".").length;
+	var n1 = (this.result(this.string)[0]).toString().split(".").length;
         var n2 = (this.result(this.string)[1]).toString().split(".").length;
         var n = Math.pow(10,Math.max(n1,n2));
         return n;
-	}
+    }
 	
-	if(this.type == "plus"){
+    if(this.type == "plus"){
         this.inputShow.value = ( ( this.result(this.string)[1] )*this.Exponentiation() + ( this.result(this.string)[0] )*this.Exponentiation() ) /this.Exponentiation();
         this.inputShow.name = "type";
     }
