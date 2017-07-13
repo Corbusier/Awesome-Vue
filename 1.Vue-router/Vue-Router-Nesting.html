@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<style>
+		a{
+			text-decoration:none;
+		}
+		.my-active{
+			color:red;
+		}
+	</style>
+</head>
+<body>
+	<div id="app">
+		<h1>Hello App!</h1>
+		<p>
+			<router-link to="/" exact>Go to home</router-link>
+			<router-link to="/news">Go to news</router-link>
+			<router-link to="/products">Go to products</router-link>
+			<router-link to="/about">Go to about</router-link>
+		</p>
+		<router-view></router-view>
+	</div>
+	<script src="https://unpkg.com/vue/dist/vue.js"></script>
+	<script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+	<script>
+		const home = {
+			template:"<div>This is home page</div>"
+		}
+		const news = {
+			template:"<div>This is news page</div>"
+		}
+		const about = {
+			template:"<div>This is about page</div>"
+		}
+		const products = {
+			template :  `<div>
+						<h2>My products</h2>
+						<router-link to="/products/book">Go to book</router-link>
+						<router-link to="/products/fruit">Go to fruit</router-link>
+						<router-view></router-link>
+						</div>`
+		}
+		const book = {
+			template:"<div>This is book</div>"
+		}
+		const fruit = {
+			template:"<div>This is fruit</div>"
+		}
+		const routes = [
+			{
+				path:"/",
+				component:home
+			},
+			{
+				path:"/news",
+				component:news
+			},
+			{
+				path:"/about",
+				component:about
+			},
+			{
+				path:"/products",
+				component:products,
+				children:[
+					{
+						path:"book",
+						component:book
+					},
+					{
+						path:"fruit",
+						component:fruit
+					}
+				]
+			},
+		]
+		const router = new VueRouter({
+			routes,
+			linkActiveClass:"my-active"
+		})
+		const app = new Vue({
+			router,
+			el:"#app"
+		})
+	</script>
+</body>
+</html>

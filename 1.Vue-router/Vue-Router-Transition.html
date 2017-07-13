@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Vue-Router2</title>
+	<style type="text/css">
+		a{
+			text-decoration:none;
+		}
+		.my-active{
+			color:red;
+		}
+		.fade-enter-active, .fade-leave-active{
+			transition:opacity .5s ease;
+		}
+		.fade-enter, .fade-leave-active{
+			opacity:0;
+		}
+		.child-view{
+			position:absolute;
+			transition:all .5s cubic-bezier(.55,0,.1,1);
+		}
+		.slide-left-enter, .slide-right-leave-active{
+			opacity:0;
+			transform:translate(30px,0);
+		}
+		.slide-left-leave-active, .slide-right-enter {
+			opacity: 0;
+			transform: translate(-30px, 0);
+		}
+	</style>
+</head>
+<body>
+	<div id="app">
+	  <h1>Hello World!</h1>
+	  <p>
+	    <!-- 使用 router-link 组件来导航. -->
+	    <!-- 通过传入 `to` 属性指定链接. -->
+	    <!-- <router-link> 默认会被渲染成一个 `<a>` 标签 -->
+	    <router-link to="/" exact >Go to home</router-link>
+	    <router-link to="/news">Go to news</router-link>
+	    <router-link to="/prodects">Go to prodects</router-link>
+	    <router-link to="/about">Go to about</router-link>
+	  </p>
+	  <!-- 路由出口 -->
+	  <!-- 路由匹配到的组件将渲染在这里 -->
+	  <transition name="fade" mode="out-in">
+	  	<router-view></router-view>
+	  </transition>
+	</div>
+	<script src="https://unpkg.com/vue/dist/vue.js"></script>
+	<script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+	<script>
+		const home = {
+			template: '<div>this is home page</div>',
+		}
+		const news = {
+			template: '<div>this is news page</div>'
+		}
+		const about = {
+			template: '<div>this is about page</div>'
+		}
+		const prodects = {
+			template: `
+						    <div>
+						      <h2>my prodects </h2>
+						     	 <router-link to="/prodects" exact>Go to Default</router-link>
+						      	<router-link to="/prodects/book">Go to book</router-link>
+						      	<router-link to="/prodects/fruit">Go to prodects</router-link>
+						      	<transition :name="transitionName">
+						      	<router-view class="child-view"></router-view>
+						      	</transition>
+						    </div>
+						  `,
+			data() {
+				return {
+					transitionName: "slide-left"
+				}
+			},
+			watch:{
+				 '$route'(to,from){
+				 	const toDepth = to.path.split('/').length
+				 	const fromDepth = from.path.split('/').length
+				 	this.transitionName = toDepth < fromDepth ? 'slide-right' : 'slide-left'
+				 }
+			}
+		}
+		const book = {
+			template: "<div> this is book </div>"
+		}
+		const fruit = {
+			template: "<div> this is fruit </div>"
+		}
+		const Default = {
+			template: "<div> this is Default </div>"
+		}
+		/*-- 定义路由 --*/
+		const routes = [{
+			path: '/',
+			component: home
+		}, {
+			path: '/news',
+			component: news
+		}, {
+			path: '/about',
+			component: about
+		}, {
+			path: '/prodects',
+			component: prodects,
+			children: [{
+				path: "book",
+				component: book,
+			}, {
+				path: "fruit",
+				component: fruit,
+			},{
+				path: "",
+				component: Default,
+			}, ],
+		}, ]
+		/*-- 创建router实例，传入定义的路由 --*/
+		const router = new VueRouter({
+			routes, // （缩写）相当于 routes: routes
+			linkActiveClass: "my-ctive",
+		})
+		/*-- 创建和挂载根实例 --*/
+		const app = new Vue({
+			router,
+			data(){
+				return {
+					fade:"fade"
+				}
+			}
+		}).$mount('#app')
+	</script>
+</body>
+</html>
