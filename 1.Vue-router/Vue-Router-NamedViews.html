@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Named Views</title>
+	<style>
+		a{
+			text-decoration:none;
+		}
+		.my-active{
+			color:red;
+		}
+	</style>
+</head>
+<body>
+	<div id="app">
+		<h1>Named Views</h1>
+		<ul>
+			<li>
+				<router-link to="">/</router-link>
+			</li>
+			<li>
+				<router-link to="/other">/other</router-link>
+			</li>
+		</ul>
+		<router-view class="view one"></router-view>
+		<router-view class="view two" name="a"></router-view>
+		<router-view class="view three" name="b"></router-view>
+	</div>
+	<script src="https://unpkg.com/vue/dist/vue.js"></script>
+	<script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+	<script>
+		const Foo = {
+			template:"<div>foo</div>"
+		}
+		const Bar = {
+			template:"<div>bar</div>"
+		}
+		const Baz = {
+			template:"<div>baz</div>"
+		}
+		const router = new VueRouter({
+			mode:"history",
+			routes:[
+				{
+					path:"/",
+					components:{
+						default:Foo,
+						a:Bar,
+						b:Baz
+					}
+				},
+				{
+					path:"other",
+					components:{
+						default:Bar,
+						a:Bar,
+						b:Foo
+					}
+				}
+			]
+		})
+		new Vue({
+			router,
+			el:"#app"
+		})
+		
+	</script>
+</body>
+</html>
