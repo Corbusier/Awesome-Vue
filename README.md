@@ -17,7 +17,10 @@
 - [过渡效果](https://github.com/Corbusier/Awesome-Vue/issues/9)
 - [过渡状态](https://github.com/Corbusier/Awesome-Vue/issues/10)
 - [自定义指令](https://github.com/Corbusier/Awesome-Vue/issues/11)
-- [Vue-Router入门](https://github.com/Corbusier/Awesome-Vue/issues/12)
+- [Vue-Router入门『上』](https://github.com/Corbusier/Awesome-Vue/issues/12)
+- [Vue-Router入门『下』](https://github.com/Corbusier/Awesome-Vue/issues/13)
+- [Vuex『上』](https://github.com/Corbusier/Awesome-Vue/issues/14)
+- [Vuex『下』](https://github.com/Corbusier/Awesome-Vue/issues/15)
 
 ## Vue-Demo
 
