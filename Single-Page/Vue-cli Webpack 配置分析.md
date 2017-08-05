@@ -1,12 +1,4 @@
-﻿title: Vue-cli Webpack 配置分析
-categories: Vue  
-tags: [Vue、Webpack]
-
----
-
-<img src="/images/vue-cli-webpack.jpg" alt="vue-cli-webpack" align=center width="640px" height="280px">
-
-> 之前已经做过一次单页面的尝试，对于vue-cli中的webpack配置并不是特别的熟悉，所以特意找来文章分析其中的配置。
+﻿> 之前已经做过一次单页面的尝试，对于vue-cli中的webpack配置并不是特别的熟悉，所以特意找来文章分析其中的配置。
 
 ## 目录结构
 
